@@ -89,64 +89,110 @@ class _BrokerScreenState extends State<BrokerScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('MQTT Broker Connection'),
+            const Text('MQTT Broker Connection', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(width: 8.0),
-            Icon(connectionStateIcon),
+            Icon(connectionStateIcon, size: 24),
           ],
         ),
       ),
-      body: SingleChildScrollView(  // Wrap the content in a scroll view
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller: brokerController,
-                decoration: const InputDecoration(labelText: 'Broker'),
-                onChanged: (value) {
-                  broker = value;
-                },
-              ),
-              TextField(
-                controller: portController,
-                decoration: const InputDecoration(labelText: 'Port'),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  port = int.tryParse(value) ?? port;
-                },
-              ),
-              TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
-                onChanged: (value) {
-                  username = value;
-                },
-              ),
-              TextField(
-                controller: passwdController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                onChanged: (value) {
-                  passwd = value;
-                },
-              ),
-              TextField(
-                controller: identifierController,
-                decoration: const InputDecoration(labelText: 'Client Identifier'),
-                onChanged: (value) {
-                  clientIdentifier = value;
-                },
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Connection Settings',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: brokerController,
+                        decoration: InputDecoration(
+                          labelText: 'Broker',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          prefixIcon: const Icon(Icons.dns),
+                        ),
+                        onChanged: (value) {
+                          broker = value;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: portController,
+                        decoration: InputDecoration(
+                          labelText: 'Port',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          prefixIcon: const Icon(Icons.settings_input_composite),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          port = int.tryParse(value) ?? port;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: usernameController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          prefixIcon: const Icon(Icons.person),
+                        ),
+                        onChanged: (value) {
+                          username = value;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: passwdController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          prefixIcon: const Icon(Icons.lock),
+                        ),
+                        obscureText: true,
+                        onChanged: (value) {
+                          passwd = value;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: identifierController,
+                        decoration: InputDecoration(
+                          labelText: 'Client Identifier',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          prefixIcon: const Icon(Icons.perm_identity),
+                        ),
+                        onChanged: (value) {
+                          clientIdentifier = value;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: connectionState == mqtt.MqttConnectionState.connected
+                      ? Colors.red
+                      : Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 onPressed: connectionState == mqtt.MqttConnectionState.connected
                     ? _disconnect
                     : _connect,
                 child: Text(
-                  connectionState == mqtt.MqttConnectionState.connected
-                      ? 'Disconnect'
-                      : 'Connect',
+                  connectionState == mqtt.MqttConnectionState.connected ? 'Disconnect' : 'Connect',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],

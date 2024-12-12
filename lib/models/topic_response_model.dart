@@ -4,7 +4,7 @@ class TopicResponseModel {
   final int id;
   final String topic;
   final String timestamp;
-  final int alertType;
+  final int alert;
   final String message;
   final String imageUrl;
   late final bool acknowledge;
@@ -13,7 +13,7 @@ class TopicResponseModel {
     this.id = 0,
     required this.topic,
     required this.timestamp,
-    required this.alertType,
+    required this.alert,
     required this.message,
     required this.imageUrl,
     this.acknowledge = false,
@@ -25,7 +25,7 @@ class TopicResponseModel {
       'id': id,
       'topic': topic,
       'timestamp': timestamp,
-      'alertType': alertType,
+      'alertType': alert,
       'message': message,
       'imageUrl': imageUrl,
       'acknowledged': acknowledge,
@@ -38,7 +38,7 @@ class TopicResponseModel {
       id: map['id'],
       topic: map['topic'],
       timestamp: map['timestamp'],
-      alertType: map['alertType'],
+      alert: map['alert'],
       message: map['message'],
       imageUrl: map['imageUrl'],
       acknowledge: map['acknowledged'] ?? false,

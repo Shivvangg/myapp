@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dialogs/alert_recieved_dialog.dart';
@@ -13,6 +12,7 @@ import 'screens/topic_screen.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'models/topic_response_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 final FlutterLocalNotificationsPlugin _notificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -31,6 +31,13 @@ Future<void> initializeNotifications() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize SharedPreferences
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Store a simple value in SharedPreferences
+  await prefs.setString('app_initialized', 'true'); // Example: Store a flag
+
   await initializeNotifications();
   runApp(const MyApp());
 }
@@ -93,46 +100,35 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _showNotificationWithImage(TopicResponseModel alert) async {
     try {
-      // Download the image from the URL
-      final http.Response response = await http.get(Uri.parse(alert.imageUrl));
-      if (response.statusCode == 200) {
-        // Save the image to the device's temporary directory
-        final String tempPath = (await getTemporaryDirectory()).path;
-        final File imageFile = File('$tempPath/alert_image.png');
-        await imageFile.writeAsBytes(response.bodyBytes);
+      // Use the image URL directly without downloading it
+      final BigPictureStyleInformation bigPictureStyleInformation =
+          BigPictureStyleInformation(
+        NetworkImage(alert.imageUrl) as AndroidBitmap<Object>, // Display image from the URL
+        contentTitle: '<b>${alert.topic}</b>',
+        htmlFormatContentTitle: true,
+        summaryText: alert.message,
+        htmlFormatSummaryText: true,
+      );
 
-        // Set up the notification details with a big picture style
-        final BigPictureStyleInformation bigPictureStyleInformation =
-            BigPictureStyleInformation(
-          FilePathAndroidBitmap(imageFile.path), // The downloaded image
-          contentTitle: '<b>${alert.topic}</b>',
-          htmlFormatContentTitle: true,
-          summaryText: alert.message,
-          htmlFormatSummaryText: true,
-        );
+      AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        'alerts_channel', // Channel ID
+        'Alerts', // Channel Name
+        channelDescription: 'Notifications for incoming MQTT alerts',
+        importance: Importance.high,
+        priority: Priority.high,
+        styleInformation: bigPictureStyleInformation,
+      );
 
-        AndroidNotificationDetails androidPlatformChannelSpecifics =
-            AndroidNotificationDetails(
-          'alerts_channel', // Channel ID
-          'Alerts', // Channel Name
-          channelDescription: 'Notifications for incoming MQTT alerts',
-          importance: Importance.high,
-          priority: Priority.high,
-          styleInformation: bigPictureStyleInformation,
-        );
+      NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
 
-        NotificationDetails platformChannelSpecifics =
-            NotificationDetails(android: androidPlatformChannelSpecifics);
-
-        await _notificationsPlugin.show(
-          0, // Notification ID
-          alert.topic, // Title
-          alert.message, // Body
-          platformChannelSpecifics,
-        );
-      } else {
-        print('Failed to download image: ${response.statusCode}');
-      }
+      await _notificationsPlugin.show(
+        0, // Notification ID
+        alert.topic, // Title
+        alert.message, // Body
+        platformChannelSpecifics,
+      );
     } catch (e) {
       print('Error displaying notification with image: $e');
     }
@@ -140,7 +136,7 @@ class _MyAppState extends State<MyApp> {
 
   // Function to start background service for maintaining MQTT connection
   Future<void> _startBackgroundService() async {
-    final androidConfig = FlutterBackgroundAndroidConfig(
+    final androidConfig = const FlutterBackgroundAndroidConfig(
       notificationTitle: "MQTT Service",
       notificationText: "MQTT client is running in the background",
       notificationIcon:

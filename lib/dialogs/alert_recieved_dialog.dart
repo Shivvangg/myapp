@@ -19,7 +19,7 @@ class AlertReceivedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MediaPlayer.playAlarm(alert.alertType);
+    MediaPlayer.playAlarm(alert.alert);
 
     return AlertDialog(
       backgroundColor: Colors.grey[900], // Dark background for the alert
@@ -31,7 +31,7 @@ class AlertReceivedDialog extends StatelessWidget {
           Expanded(
             child: Text(
               alert.topic,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -39,7 +39,7 @@ class AlertReceivedDialog extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close),
             color: Colors.white,
             onPressed: () {
               MediaPlayer.stopAlarm(); // Stop the alarm when dialog is closed
@@ -51,14 +51,14 @@ class AlertReceivedDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Divider(
+          const Divider(
             color: Colors.white,
             thickness: 2,
             height: 20,
           ),
           Row(
             children: [
-              Text(
+              const Text(
                 'Date:',
                 style: TextStyle(
                   fontSize: 15,
@@ -66,26 +66,26 @@ class AlertReceivedDialog extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(width: 5),
+              const SizedBox(width: 5),
               Text(
                 DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(alert.timestamp)),
-                style: TextStyle(fontSize: 15, color: Colors.white),
+                style: const TextStyle(fontSize: 15, color: Colors.white),
               ),
             ],
           ),
           if (alert.imageUrl.isNotEmpty)
             CachedNetworkImage(
               imageUrl: alert.imageUrl,
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Icon(Icons.error, color: Colors.red),
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
               height: 200,
               width: 150,
               fit: BoxFit.cover,
             ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             children: [
-              Text(
+              const Text(
                 'Message:',
                 style: TextStyle(
                   fontSize: 15,
@@ -93,13 +93,13 @@ class AlertReceivedDialog extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(width: 5),
+              const SizedBox(width: 5),
               Expanded(
                 child: Text(
                   alert.message,
                   style: TextStyle(
                     fontSize: 15,
-                    color: _getAlertColor(alert.alertType),
+                    color: _getAlertColor(alert.alert),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -118,16 +118,16 @@ class AlertReceivedDialog extends StatelessWidget {
             } catch (e) {
               // Handle error, maybe show a snackbar
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error acknowledging alert')),
+                const SnackBar(content: Text('Error acknowledging alert')),
               );
             }
           },
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white, backgroundColor: Colors.blue,
-            textStyle: TextStyle(fontWeight: FontWeight.bold),
-            padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
           ),
-          child: Text('Acknowledge'),
+          child: const Text('Acknowledge'),
         ),
       ],
     );

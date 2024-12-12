@@ -20,21 +20,26 @@ class _AlertsScreenState extends State<AlertsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAlerts(); // Load alerts from SharedPreferences
+    _loadAlerts();
 
     if (widget.mqttManager.connectionState ==
         mqtt.MqttConnectionState.connected) {
-      widget.mqttManager.onAlertReceived = (alert) => _onNewAlert(alert);
+      if (widget.mqttManager.onAlertReceived == null) {
+        widget.mqttManager.onAlertReceived = (alert) => _onNewAlert(alert);
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('MQTT is not connected')),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('MQTT is not connected')),
+        );
+      });
     }
   }
 
   @override
   void dispose() {
-    widget.mqttManager.disconnect();
+    widget.mqttManager.onAlertReceived = null; // Reset callback
+    // widget.mqttManager.disconnect();
     super.dispose();
   }
 
@@ -49,14 +54,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
     setState(() {
       _alerts.add(alert);
     });
-    await _alertsRepo
-        .addReceivedAlert(alert); // Save alert to SharedPreferences
+    await _alertsRepo.addReceivedAlert(alert);
     _showAlertWindow(alert);
   }
 
   void _showAlertWindow(TopicResponseModel alert) {
-    print(
-        'New alert: ${alert.message}'); // Replace with overlay/notification logic
+    print('New alert: ${alert.message}');
   }
 
   @override
@@ -76,13 +79,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   onAcknowledge: () async {
                     await _alertsRepo.acknowledgeAlert(alert.timestamp);
                     setState(() {
-                      alert.acknowledge = true; // Update locally
+                      alert.acknowledge = true;
                     });
                   },
                   onDelete: () async {
                     await _alertsRepo.removeAlert(alert);
                     setState(() {
-                      _alerts.removeAt(index); // Update the list
+                      _alerts.removeAt(index);
                     });
                   },
                 );
@@ -92,7 +95,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
   }
 }
 
-// Widget to display each alert as a list item
 class _AlertListItem extends StatelessWidget {
   final TopicResponseModel alert;
   final VoidCallback onAcknowledge;
@@ -155,7 +157,7 @@ class _AlertListItem extends StatelessWidget {
               alert.message,
               style: TextStyle(
                 fontSize: 15,
-                color: _getAlertTextColor(alert.alertType),
+                color: _getAlertTextColor(alert.alert),
               ),
             ),
             const SizedBox(height: 8),
@@ -169,7 +171,6 @@ class _AlertListItem extends StatelessWidget {
     );
   }
 
-  // Method to return the color based on the alert type
   Color _getAlertTextColor(int? alertType) {
     switch (alertType) {
       case 1:

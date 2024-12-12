@@ -9,7 +9,7 @@ class MQTTManager {
   static const MethodChannel platform = MethodChannel('com.example.myapp/mqtt');
   static MQTTManager? _instance;
 
-  late mqtt1.MqttServerClient client; // Use MqttServerClient here
+  late mqtt1.MqttServerClient client;
   mqtt.MqttConnectionState connectionState =
       mqtt.MqttConnectionState.disconnected;
 
@@ -22,13 +22,12 @@ class MQTTManager {
   final List<String> subscribedTopics = [];
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final List<String> topics = [];
-  late final Function(TopicResponseModel) onAlertReceived;
+  Function(TopicResponseModel)? onAlertReceived;
 
-  MQTTManager._internal({required this.onAlertReceived});
+  MQTTManager._internal();
 
-  static MQTTManager getInstance(
-      {required Function(TopicResponseModel) onAlertReceived}) {
-    _instance ??= MQTTManager._internal(onAlertReceived: onAlertReceived);
+  static MQTTManager getInstance({required void Function(dynamic alert) onAlertReceived}) {
+    _instance ??= MQTTManager._internal();
     return _instance!;
   }
 
@@ -45,7 +44,6 @@ class MQTTManager {
     this.password = password;
     this.clientIdentifier = clientIdentifier;
 
-    // Initialize the MqttServerClient
     client = mqtt1.MqttServerClient(broker, clientIdentifier);
     client.port = port;
     client.logging(on: true);
@@ -141,20 +139,17 @@ class MQTTManager {
           message.payload.message);
 
       final alert = TopicResponseModel.fromJson(json.decode(messageString));
-      onAlertReceived(alert);
+      if (onAlertReceived != null) {
+        onAlertReceived!(alert);
+      }
 
       platform.invokeMethod('newAlert', {
         'topic': alert.topic,
         'timestamp': alert.timestamp,
         'message': alert.message,
         'imageUrl': alert.imageUrl,
-        'alertType': alert.alertType,
+        'alertType': alert.alert,
       });
     });
-  }
-
-  void _handleAlert(TopicResponseModel alert) {
-    // You could do something here with the alert, e.g., show a notification or alert in the UI
-    print('New Alert received: ${alert.message}');
   }
 }

@@ -103,6 +103,6 @@ class AlertsRepoImpl implements AlertsRepo {
 
     // Get the most recent alert based on timestamp
     topicAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp)); // Sort descending by timestamp
-    return topicAlerts.first.alertType;
+    return topicAlerts.first.alert;
   }
 }
